@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tesla Power Trading Strategy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00d4ff, #ff6b9d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .strategy-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid;
+            text-align: center;
+        }
+
+        .group-1 { border-color: #ff6b6b; }
+        .group-2 { border-color: #4ecdc4; }
+        .group-3 { border-color: #45b7d1; }
+
+        .group h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .group p {
+            margin: 3px 0;
+            color: #ccc;
+        }
+
+        .formula-box {
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(139, 69, 19, 0.5);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .formula-title {
+            color: #deb887;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4ecdc4;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #4ecdc4, #ff6b9d);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .calculation-steps {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .level-card h4 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .level-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .concept-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .concept-list li {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .concept-list li::before {
+            content: "•";
+            color: #4ecdc4;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+
+        .concept-list strong {
+            color: #4ecdc4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tesla Power Trading Strategy</h1>
+        <p class="subtitle">Numerological Price Level Calculator</p>
+        
+        <div class="strategy-section">
+            <h2 class="section-title">Strategy Rules & Groups</h2>
+            
+            <div class="group group-1">
+                <h3>Group 1: 1,4,7</h3>
+                <p>Sum = 12</p>
+                <p>Leader Group</p>
+            </div>
+            
+            <div class="group group-2">
+                <h3>Group 2: 2,5,8</h3>
+                <p>Sum = 15</p>
+                <p>Leader Group</p>
+            </div>
+            
+            <div class="group group-3">
+                <h3>Group 3: 3,6,9</h3>
+                <p>Sum = 18</p>
+                <p>Leader Group</p>
+            </div>
+            
+            <div class="formula-box">
+                <div class="formula-title">Tesla Power Formula:</div>
+                1. Mark Bottom/Top (360 bars rule)<br>
+                2. Calculate digit sum until single digit<br>
+                3. Match with leader group (12, 15, 18)<br>
+                4. Major Line = Price + Leader Group × 1000<br>
+                5. Minor Lines = Major ÷ 2, ÷ 4, ÷ 8, ÷ 16
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <h2 class="section-title">Price Input</h2>
+            
+            <div class="input-group">
+                <label for="price">Bottom/Top Price:</label>
+                <input type="number" id="price" placeholder="Enter price (e.g., 98200)" step="0.01">
+            </div>
+            
+            <div class="input-group">
+                <label for="trend">Trend Direction:</label>
+                <select id="trend">
+                    <option value="uptrend">Uptrend (Add +)</option>
+                    <option value="downtrend">Downtrend (Subtract -)</option>
+                </select>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateLevels()">
+                Calculate Tesla Power Levels
+            </button>
+        </div>
+        
+        <div class="results-section" id="results">
+            <h2 class="section-title">Tesla Power Levels</h2>
+            <div id="calculationSteps" class="calculation-steps"></div>
+            <div id="levelsContainer" class="levels-grid"></div>
+        </div>
+        
+        <div class="explanation">
+            <h2 class="section-title">Strategy Explanation</h2>
+            <h3 style="color: #ccc; margin-bottom: 15px;">Key Concepts:</h3>
+            
+            <ul class="concept-list">
+                <li><strong>360 Bars Rule:</strong> Mark significant bottom/top that hasn't repeated in 360 bars</li>
+                <li><strong>Digit Reduction:</strong> Keep adding digits until you get a single number (1-9)</li>
+                <li><strong>Leader Groups:</strong> Group 1 (1,4,7)=12, Group 2 (2,5,8)=15, Group 3 (3,6,9)=18</li>
+                <li><strong>Level Calculation:</strong> Add leader group value (×1000) to match price digits</li>
+                <li><strong>Minor Levels:</strong> Divide major level by 2, 4, 8, 16 for intermediate targets</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function digitSum(num) {
+            while (num >= 10) {
+                num = num.toString().split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+            }
+            return num;
+        }
+
+        function getLeaderGroup(digit) {
+            if ([1, 4, 7].includes(digit)) return { group: 1, value: 12, name: "Group 1 (1,4,7)" };
+            if ([2, 5, 8].includes(digit)) return { group: 2, value: 15, name: "Group 2 (2,5,8)" };
+            if ([3, 6, 9].includes(digit)) return { group: 3, value: 18, name: "Group 3 (3,6,9)" };
+        }
+
+        function calculateLevels() {
+            const price = parseFloat(document.getElementById('price').value);
+            const trend = document.getElementById('trend').value;
+            
+            if (!price || price <= 0) {
+                alert('Please enter a valid price');
+                return;
+            }
+            
+            // Calculate digit sum
+            const priceDigitSum = digitSum(Math.floor(price));
+            const leaderGroup = getLeaderGroup(priceDigitSum);
+            
+            // Calculate major level
+            const adjustment = leaderGroup.value * 1000;
+            const majorLevel = trend === 'uptrend' ? price + adjustment : price - adjustment;
+            
+            // Calculate minor levels
+            const minorLevels = [
+                majorLevel / 2,
+                majorLevel / 4,
+                majorLevel / 8,
+                majorLevel / 16
+            ];
+            
+            // Display calculation steps
+            const stepsHtml = `
+                <strong>Calculation Steps:</strong><br>
+                1. Input Price: ${price.toLocaleString()}<br>
+                2. Digit Sum: ${Math.floor(price)} → ${priceDigitSum}<br>
+                3. Leader Group: ${leaderGroup.name} = ${leaderGroup.value}<br>
+                4. Trend Direction: ${trend === 'uptrend' ? 'Uptrend (+)' : 'Downtrend (-)'}<br>
+                5. Major Level: ${price.toLocaleString()} ${trend === 'uptrend' ? '+' : '-'} ${adjustment.toLocaleString()} = ${majorLevel.toLocaleString()}
+            `;
+            
+            document.getElementById('calculationSteps').innerHTML = stepsHtml;
+            
+            // Display levels
+            const levelsHtml = `
+                <div class="level-card">
+                    <h4>Major Level</h4>
+                    <div class="level-value">${majorLevel.toLocaleString()}</div>
+                    <small>Primary Target</small>
+                </div>
+                <div class="level-card">
+                    <h4>Minor Level 1</h4>
+                    <div class="level-value">${minorLevels[0].toLocaleString()}</div>
+                    <small>Major ÷ 2</small>
+                </div>
+                <div class="level-card">
+                    <h4>Minor Level 2</h4>
+                    <div class="level-value">${minorLevels[1].toLocaleString()}</div>
+                    <small>Major ÷ 4</small>
+                </div>
+                <div class="level-card">
+                    <h4>Minor Level 3</h4>
+                    <div class="level-value">${minorLevels[2].toLocaleString()}</div>
+                    <small>Major ÷ 8</small>
+                </div>
+                <div class="level-card">
+                    <h4>Minor Level 4</h4>
+                    <div class="level-value">${minorLevels[3].toLocaleString()}</div>
+                    <small>Major ÷ 16</small>
+                </div>
+            `;
+            
+            document.getElementById('levelsContainer').innerHTML = levelsHtml;
+            document.getElementById('results').style.display = 'block';
+            
+            // Smooth scroll to results
+            document.getElementById('results').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        // Allow Enter key to trigger calculation
+        document.getElementById('price').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateLevels();
+            }
+        });
+
+        // Auto-fill with example value for demonstration
+        window.addEventListener('load', function() {
+            document.getElementById('price').value = '98200';
+        });
+    </script>
+</body>
+</html>
